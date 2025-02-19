@@ -1,0 +1,5 @@
+SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST
+where COMMAND <> 'Sleep'
+order by time desc
+
+;
