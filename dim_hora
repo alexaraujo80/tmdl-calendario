@@ -1,0 +1,27 @@
+let
+    // Configuração inicial
+    StartTime = #time(0, 0, 0),  // Início do dia
+    EndTime = #time(23, 59, 59),  // Fim do dia
+    Interval = #duration(0, 0, 1, 0),  // Intervalo de 1 minuto
+
+    // Criar lista de horários
+    TimeList = List.Times(StartTime, Duration.TotalMinutes(EndTime - StartTime) + 1, Interval),
+
+    // Converter a lista em tabela
+    TimeTable = Table.FromList(TimeList, Splitter.SplitByNothing(), {"Hora Completa"}),
+
+    // Extrair Componentes de Tempo
+    HoraExpanded = Table.TransformColumns(TimeTable, {
+        {"Hora Completa", each Time.From(_), type time}
+    }),
+
+    // Adicionar colunas derivadas
+    AdicionarHoras = Table.AddColumn(HoraExpanded, "Horas", each Time.Hour([Hora Completa]), Int64.Type),
+    AdicionarMinutos = Table.AddColumn(AdicionarHoras, "Minutos", each Time.Minute([Hora Completa]), Int64.Type),
+    AdicionarAMPM = Table.AddColumn(AdicionarMinutos, "AM/PM", each if [Horas] < 12 then "AM" else "PM", type text),
+
+    // Ordenar a tabela
+    TabelaOrdenada = Table.Sort(AdicionarAMPM, {{"Hora Completa", Order.Ascending}})
+    
+in
+    TabelaOrdenada
